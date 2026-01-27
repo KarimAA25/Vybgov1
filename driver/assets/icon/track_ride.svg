@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Track Ride icon">
+  <!-- Background rounded card -->
+  <rect x="8" y="8" width="240" height="240" rx="28" ry="28" fill="#F0FFF4"/>
+
+  <!-- Path / route line -->
+  <path d="M40 200 C80 140, 180 140, 216 80" stroke="#38A169" stroke-width="6" stroke-linecap="round" stroke-dasharray="10,8" fill="none"/>
+
+  <!-- Car -->
+  <g transform="translate(40,120)">
+    <!-- Body -->
+    <rect x="0" y="24" rx="8" ry="8" width="72" height="28" fill="#2B6CB0"/>
+    <!-- Cabin -->
+    <path d="M8 24 L20 6 L52 6 L64 24 Z" fill="#2B6CB0"/>
+    <!-- Window -->
+    <path d="M22 10 L48 10 L58 24 L12 24 Z" fill="#BEE3F8"/>
+    <!-- Wheels -->
+    <circle cx="16" cy="56" r="8" fill="#0F172A"/>
+    <circle cx="56" cy="56" r="8" fill="#0F172A"/>
+  </g>
+
+  <!-- Map pin (destination) -->
+  <g transform="translate(176,28)">
+    <path d="M48 12 C31 12, 20 24, 20 40 C20 64, 48 92, 48 92 C48 92, 76 64, 76 40 C76 24, 65 12, 48 12 Z" fill="#E53E3E"/>
+    <circle cx="48" cy="40" r="12" fill="#FFF"/>
+  </g>
+
+  <!-- Label -->
+  <text x="128" y="230" font-family="Segoe UI, Roboto, Arial" font-size="16" fill="#22543D" text-anchor="middle" font-weight="600">TRACK RIDE</text>
+</svg>

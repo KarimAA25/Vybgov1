@@ -1,0 +1,105 @@
+name: customer
+version: 1.0.0+1
+publish_to: none
+description: A new Flutter project.
+environment:
+  sdk: '>=3.2.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  sign_in_with_apple: ^7.0.1
+  google_sign_in: ^7.2.0
+  firebase_auth: ^6.1.3
+  firebase_core: ^4.3.0
+  firebase_messaging: ^16.1.0
+  flutterflow_paginate_firestore: ^1.0.3+1
+  firebase_storage: ^13.0.5
+  shared_preferences: ^2.5.4
+  flutter_local_notifications: ^19.5.0
+  auto_size_text_field: ^2.2.4
+  syncfusion_flutter_datepicker: ^32.1.20
+  share_plus: ^12.0.1
+
+  #pdf
+  pdf: ^3.11.3
+  open_file: ^3.5.10
+  excel: ^4.0.6
+
+  get: ^4.7.3
+  provider: ^6.1.5+1
+  http_auth: ^1.0.4
+  country_code_picker: ^3.4.1
+  flutter_easyloading: ^3.0.5
+  flutter_svg: ^2.2.3
+  google_fonts: ^6.3.3
+
+  pinput: ^6.0.1
+
+  crypto: ^3.0.7
+  intl: ^0.20.2
+
+  timelines_plus: ^1.0.8
+  path_provider: ^2.1.5
+
+  #  google_places_flutter: ^2.0.8
+  flutter_polyline_points: ^3.1.0
+  google_maps_flutter: ^2.14.0
+  location: ^8.0.1
+  #  map_launcher: ^3.5.0 //non-used
+
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  geoflutterfire2: ^2.3.15
+  googleapis_auth: ^2.0.0
+  dio: ^5.9.0
+  uuid: ^4.5.2
+
+  http: ^1.6.0
+  cached_network_image: ^3.4.1
+  image_picker: ^1.2.1
+  flutter_image_compress: ^2.4.0
+  flutter_widget_from_html: ^0.17.1
+  flutter_rating_bar: ^4.0.1
+  permission_handler: ^12.0.1
+  tuple: ^2.0.2
+  flutter_google_maps_webservices: ^1.1.1
+
+  #OSM
+  latlong2: ^0.9.1
+  flutter_map: ^8.2.2
+  flutter_map_location_marker: ^10.1.0
+
+  #payment_dependencies
+  flutter_stripe: ^12.1.1
+  #  flutter_paypal_native: ^2.1.0
+  razorpay_flutter: ^1.4.0
+  mp_integration: ^0.0.1
+  url_launcher: ^6.3.2
+  dotted_border: ^3.1.0
+
+  mailer: ^6.6.0
+  lottie: ^3.3.2
+
+dependency_overrides:
+  web: ^1.1.1
+  rxdart: ^0.28.0
+  google_api_headers: ^5.1.0
+  package_info_plus: ^9.0.0
+  cloud_firestore: ^6.1.1
+  fluttertoast: ^9.0.0
+  archive: 3.6.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icon/
+    - assets/animation/

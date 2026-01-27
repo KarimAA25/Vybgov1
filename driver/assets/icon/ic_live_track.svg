@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Track ride icon">
+  <!-- Transparent background -->
+  <rect width="128" height="128" fill="none"/>
+  <!-- Route / path (subtle) -->
+  <path d="M12 96 C36 64, 92 64, 116 36" stroke="#38A169" stroke-width="4" stroke-linecap="round" stroke-dasharray="8,6" fill="none" opacity="0.9"/>
+  <!-- Car (left) -->
+  <g transform="translate(10,48)" aria-hidden="true">
+    <rect x="0" y="16" rx="6" ry="6" width="52" height="20" fill="#2B6CB0"/>
+    <path d="M6 16 L16 4 L40 4 L46 16 Z" fill="#2B6CB0"/>
+    <path d="M18 6 L38 6 L44 16 L12 16 Z" fill="#BEE3F8"/>
+    <circle cx="12" cy="40" r="6" fill="#0F172A"/>
+    <circle cx="40" cy="40" r="6" fill="#0F172A"/>
+  </g>
+  <!-- Map pin (right) -->
+  <g transform="translate(76,8)" aria-hidden="true">
+    <path d="M28 6 C17 6, 8 15, 8 26 C8 44, 28 64, 28 64 C28 64, 48 44, 48 26 C48 15, 39 6, 28 6 Z" fill="#E53E3E"/>
+    <circle cx="28" cy="26" r="10" fill="#FFFFFF"/>
+  </g>
+</svg>

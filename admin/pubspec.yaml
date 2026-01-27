@@ -1,0 +1,109 @@
+name: admin
+description: "A new Flutter project."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+environment:
+  sdk: '>=3.3.1 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  #common
+  get: ^4.7.3
+  cloud_firestore: ^6.1.1
+  flutter_screenutil: ^5.9.3
+  flutter_svg: ^2.2.3
+  nb_utils: ^7.1.8
+  uuid: ^4.5.2
+  intl: ^0.20.2
+  image_picker: ^1.2.1
+  shared_preferences: ^2.5.4
+  cached_network_image: ^3.4.1
+  html: ^0.15.6
+  provider: ^6.1.5+1
+  aligned_dialog: ^0.0.7
+  flex_color_picker: ^3.7.2
+  url_strategy: ^0.3.0
+  syncfusion_flutter_charts: ^32.1.21
+  flutter_easyloading: ^3.0.5
+  file_picker: ^10.3.7
+  flutter_custom_text_input_formatter: ^0.0.4
+  location: ^8.0.1
+  timelines_plus: ^1.0.8
+  syncfusion_flutter_datepicker: ^32.1.21
+  pdf: ^3.11.3
+  open_file: ^3.5.10
+  excel: ^4.0.6
+  dropdown_search: ^6.0.2
+  googleapis_auth: ^2.0.0
+  google_places_autocomplete_text_field: ^3.0.0
+  url_launcher: ^6.3.2
+
+  #Firebase
+  firebase_auth: ^6.1.3
+  firebase_core: ^4.3.0
+  firebase_storage: ^13.0.5
+
+  google_maps_flutter: ^2.14.0
+  geolocator: ^14.0.2
+
+  html_editor_enhanced:
+    path: ./html_editor_enhanced
+  dio: ^5.9.0
+  http: ^1.6.0
+  flutter_google_places_sdk: ^0.4.3
+  country_code_picker: ^3.4.1
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+
+dependency_overrides:
+  intl: ^0.20.2
+  web: ^1.1.1
+  fluttertoast: ^9.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/fonts/
+    - assets/image/
+    - assets/icons/
+    - assets/animation/
+
+  fonts:
+    - family: Inter-Regular
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+
+    - family: Inter-Medium
+      fonts:
+        - asset: assets/fonts/Inter-Medium.ttf
+
+    - family: Inter-Bold
+      fonts:
+        - asset: assets/fonts/Inter-Bold.ttf
+
+    - family: Inter-Light
+      fonts:
+        - asset: assets/fonts/Inter-Light.ttf
+
+    - family: Inter-Thin
+      fonts:
+        - asset: assets/fonts/Inter-Thin.ttf
+
+    - family: Inter-ExtraBold
+      fonts:
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+
+    - family: Recoleta-SemiBold
+      fonts:
+        - asset: assets/fonts/Recoleta-SemiBold.ttf

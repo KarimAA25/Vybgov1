@@ -1,0 +1,64 @@
+// ignore_for_file: unnecessary_overrides
+
+// ignore_for_file: depend_on_referenced_packages
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:driver/app/models/driver_user_model.dart';
+import 'package:driver/app/models/rental_booking_model.dart';
+import 'package:get/get.dart';
+import 'package:driver/app/models/user_model.dart';
+import 'package:driver/constant/booking_status.dart';
+import 'package:driver/constant/send_notification.dart';
+import 'package:driver/constant_widgets/show_toast_dialog.dart';
+import 'package:driver/utils/fire_store_utils.dart';
+
+class OtpRentalScreenController extends GetxController {
+  @override
+  void onInit() {
+    super.onInit();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+  }
+
+  @override
+  void onClose() {
+    super.onClose();
+  }
+
+  RxString otp = ''.obs;
+
+  Future<bool> startBooking(RentalBookingModel bookingModels) async {
+    RentalBookingModel bookingModel = bookingModels;
+    bookingModel.bookingStatus = BookingStatus.bookingOngoing;
+    bookingModel.updateAt = Timestamp.now();
+    bookingModel.pickupTime = Timestamp.now();
+    bool? isStarted = await FireStoreUtils.setRentalRide(bookingModel);
+    DriverUserModel? driverModel = await FireStoreUtils.getDriverUserProfile(bookingModel.driverId.toString());
+
+    driverModel!.bookingId = bookingModel.id;
+    driverModel.status = "busy";
+    await FireStoreUtils.updateDriverUser(driverModel);
+
+    ShowToastDialog.showToast("Your ride started....".tr);
+    if (isStarted == true) {
+      UserModel? receiverUserModel = await FireStoreUtils.getUserProfile(bookingModel.customerId.toString());
+      if (receiverUserModel != null && receiverUserModel.fcmToken != null && receiverUserModel.fcmToken!.isNotEmpty) {
+        Map<String, dynamic> playLoad = <String, dynamic>{"bookingId": bookingModel.id};
+        await SendNotification.sendOneNotification(
+          type: "order",
+          token: receiverUserModel.fcmToken!,
+          title: 'Your Ride is Started',
+          customerId: receiverUserModel.id,
+          senderId: FireStoreUtils.getCurrentUid(),
+          bookingId: bookingModel.id.toString(),
+          driverId: bookingModel.driverId.toString(),isBooking: false,
+          body: 'Your Ride is Started From ${bookingModel.pickUpLocationAddress.toString()}.',
+          payload: playLoad,
+        );
+      }
+    }
+    return isStarted;
+  }
+}

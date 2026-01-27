@@ -1,0 +1,34 @@
+class CollectionName {
+  static const String admin = "admin";
+  static const String banner = "banner";
+  static const String zones = "zones";
+  static const String onBoarding = "onboarding_screen";
+  static const String users = "users";
+  static const String bookings = "bookings";
+  static const String drivers = "drivers";
+  static const String countryTax = "country_tax";
+  static const String currencies = "currencies";
+  static const String settings = "settings";
+  static const String languages = "languages";
+  static const String documents = "documents";
+  static const String coupon = "coupon";
+  static const String vehicleBrand = "vehicle_brand";
+  static const String vehicleModel = "vehicle_model";
+  static const String vehicleType = "vehicle_type";
+  static const String walletTransaction = "wallet_transaction";
+  static const String withDrawHistory = "withdrawal_history";
+  static const String supportReason = "support_reason";
+  static const String supportTicket = "support_ticket";
+  static const String interCityRide = "intercity_ride";
+  static const String parcelRide = "parcel_ride";
+  static const String subscriptionPlans = "subscription_plans";
+  static const String subscriptionHistory = "subscription_history";
+  static const String rentalPackage = "rental_packages";
+  static const String rentalRide = "rental_ride";
+  static const String notificationFromAdmin = "notification_from_admin";
+  static const String loyaltyPointHistory = "loyalty_point_transaction";
+  static const String emailTemplate = "email_template";
+  static const String notification = "notification";
+  static const String sosAlerts = "sos_alerts";
+  static const String bankDetails = "bank_details";
+}
