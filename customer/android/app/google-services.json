@@ -1,19 +1,82 @@
 {
   "project_info": {
-    "project_number": "YOUR_PROJECT_NUMBER",
-    "firebase_url": "https://YOUR_PROJECT_ID.firebaseio.com",
-    "project_id": "YOUR_PROJECT_ID",
-    "storage_bucket": "YOUR_PROJECT_ID.appspot.com"
+    "project_number": "836911324936",
+    "project_id": "vybgo-c2ee0",
+    "storage_bucket": "vybgo-c2ee0.firebasestorage.app"
   },
-  "api_key": [
+  "client": [
     {
-      "current_key": "YOUR_FIREBASE_API_KEY"
+      "client_info": {
+        "mobilesdk_app_id": "1:836911324936:android:759ad66fc71630fdaa96bd",
+        "android_client_info": {
+          "package_name": "com.example.vybgo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "836911324936-feae07fn55frgm0ihg4jmvdkbmhu2shp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiQ6owAzZuCKMMBMHeiTCiu5X-HCfAkiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "836911324936-feae07fn55frgm0ihg4jmvdkbmhu2shp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "836911324936-4sjcq1hqmskuospsdc22ddkjl398g821.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vybgo"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836911324936:android:352463d3ec285591aa96bd",
+        "android_client_info": {
+          "package_name": "com.vybgo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "836911324936-feae07fn55frgm0ihg4jmvdkbmhu2shp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiQ6owAzZuCKMMBMHeiTCiu5X-HCfAkiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "836911324936-feae07fn55frgm0ihg4jmvdkbmhu2shp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "836911324936-4sjcq1hqmskuospsdc22ddkjl398g821.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.vybgo"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
-  "services": {
-    "appinvite_service": {
-      "other_platform_oauth_client": []
-    }
-  },
   "configuration_version": "1"
 }
