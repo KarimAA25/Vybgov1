@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides
+import 'dart:async';
 import 'dart:developer';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -32,6 +33,8 @@ class ParcelBookingDetailsController extends GetxController {
   Rx<ReviewModel> driverToCustomerReview = ReviewModel().obs;
   Rx<ReviewModel> customerToDriverReview = ReviewModel().obs;
 
+  StreamSubscription<ParcelModel?>? _bookingSub;
+
   @override
   void onInit() {
     super.onInit();
@@ -56,26 +59,35 @@ class ParcelBookingDetailsController extends GetxController {
     }
   }
 
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    super.onClose();
+  }
+
   Future<void> getBookingDetails() async {
     isLoading.value = true;
     final args = Get.arguments;
-    if (args != null && args["bookingId"] != null) {
-      bookingId.value = args["bookingId"];
-      isSearch.value = args["isSearch"] ?? false;
-      try {
-        FireStoreUtils.getParcelRideDetails(bookingId.value).listen((ParcelModel? model) {
-          if (model != null) {
-            parcelModel.value = model;
-          } else {
-            log("⚠️ No booking details found for ID: \\${bookingId.value}");
-          }
-          isLoading.value = false;
-        });
-      } catch (error) {
-        log(" Error fetching booking details: $error");
+    if (args == null || args["bookingId"] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
+    }
+
+    bookingId.value = args["bookingId"];
+    isSearch.value = args["isSearch"] ?? false;
+    try {
+      _bookingSub?.cancel();
+      _bookingSub = FireStoreUtils.getParcelRideDetails(bookingId.value).listen((ParcelModel? model) {
+        if (model != null) {
+          parcelModel.value = model;
+        } else {
+          log("⚠️ No booking details found for ID: \\${bookingId.value}");
+        }
         isLoading.value = false;
-      }
-    } else {
+      });
+    } catch (error) {
+      log(" Error fetching booking details: $error");
       isLoading.value = false;
     }
   }

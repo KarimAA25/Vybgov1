@@ -1,0 +1,8 @@
+{
+  "example_collection": [
+    {
+      "id": "example",
+      "note": "Replace with real exported data from Firestore when needed."
+    }
+  ]
+}

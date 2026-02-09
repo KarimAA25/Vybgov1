@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:driver/app/models/emergency_number_model.dart';
@@ -12,6 +13,8 @@ class EmergencyContactsController extends GetxController {
   RxList<EmergencyContactModel> totalEmergencyContacts = <EmergencyContactModel>[].obs;
   Rx<EmergencyContactModel> contactModel = EmergencyContactModel().obs;
 
+  StreamSubscription? _emergencySub;
+
   Rx<TextEditingController> nameController = TextEditingController().obs;
   Rx<TextEditingController> phoneNumberController = TextEditingController().obs;
   Rx<TextEditingController> countryCodeController = TextEditingController(text: Constant.countryCode).obs;
@@ -25,7 +28,8 @@ class EmergencyContactsController extends GetxController {
   void getEmergencyContacts() {
     isLoading.value = true;
 
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {
@@ -42,6 +46,12 @@ class EmergencyContactsController extends GetxController {
       isLoading.value = false;
       update();
     });
+  }
+
+  @override
+  void onClose() {
+    _emergencySub?.cancel();
+    super.onClose();
   }
 
   Future<void> addEmergencyContact() async {

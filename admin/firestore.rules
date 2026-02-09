@@ -2,8 +2,285 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admin/$(request.auth.uid));
+    }
+
+    function isOwnerByResourceField(field) {
+      return isSignedIn() && resource.data[field] == request.auth.uid;
+    }
+
+    function isOwnerByRequestField(field) {
+      return isSignedIn() && request.resource.data[field] == request.auth.uid;
+    }
+
+    function isOwnerByAnyField(fields) {
+      return isSignedIn() &&
+        (resource.data[fields[0]] == request.auth.uid ||
+         (fields.size() > 1 && resource.data[fields[1]] == request.auth.uid) ||
+         (fields.size() > 2 && resource.data[fields[2]] == request.auth.uid));
+    }
+
+    function isOwnerByAnyRequestField(fields) {
+      return isSignedIn() &&
+        (request.resource.data[fields[0]] == request.auth.uid ||
+         (fields.size() > 1 && request.resource.data[fields[1]] == request.auth.uid) ||
+         (fields.size() > 2 && request.resource.data[fields[2]] == request.auth.uid));
+    }
+
+    function hasAllFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function idMatches(docId) {
+      return request.resource.data.id == docId;
+    }
+
+    // Admin collection
+    match /admin/{adminId} {
+      allow read, write: if isAdmin() && request.auth.uid == adminId;
+    }
+
+    // Public configuration (read for signed-in users, write for admins)
+    match /settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /{collectionId in [
+      "currencies",
+      "vehicle_type",
+      "vehicle_brand",
+      "vehicle_model",
+      "languages",
+      "documents",
+      "zones",
+      "subscription_plans",
+      "subscription_history",
+      "rental_packages",
+      "country_tax",
+      "banner",
+      "coupon",
+      "support_reason",
+      "email_template",
+      "notification_from_admin"
+    ]}/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Users & Drivers
+    match /users/{userId} {
+      allow read: if isAdmin() || isSignedIn();
+      allow create: if (isOwnerByRequestField("id") || request.auth.uid == userId) && idMatches(userId);
+      allow update: if (isAdmin() || request.auth.uid == userId) && idMatches(userId);
+      allow delete: if isAdmin();
+    }
+
+    match /drivers/{driverId} {
+      allow read: if isAdmin() || isSignedIn();
+      allow create: if (isOwnerByRequestField("id") || request.auth.uid == driverId) && idMatches(driverId);
+      allow update: if (isAdmin() || request.auth.uid == driverId) && idMatches(driverId);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId}/emergency_contacts/{contactId} {
+      allow read: if isAdmin() || request.auth.uid == userId;
+      allow create, update: if request.auth.uid == userId && idMatches(contactId) && hasAllFields(["id", "name", "phoneNumber", "countryCode"]);
+      allow delete: if isAdmin() || request.auth.uid == userId;
+    }
+
+    match /drivers/{driverId}/emergency_contacts/{contactId} {
+      allow read: if isAdmin() || request.auth.uid == driverId;
+      allow create, update: if request.auth.uid == driverId && idMatches(contactId) && hasAllFields(["id", "name", "phoneNumber", "countryCode"]);
+      allow delete: if isAdmin() || request.auth.uid == driverId;
+    }
+
+    match /users/{userId}/sharing_persons/{personId} {
+      allow read: if isAdmin() || request.auth.uid == userId;
+      allow create, update: if request.auth.uid == userId && idMatches(personId) && hasAllFields(["id", "name", "mobileNumber"]);
+      allow delete: if isAdmin() || request.auth.uid == userId;
+    }
+
+    // Bookings and ride entities
+    match /bookings/{bookingId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["customerId", "driverId"]);
+      allow create: if isSignedIn() && idMatches(bookingId) && hasAllFields(["id", "customerId", "bookingStatus", "createAt"]) &&
+        (request.resource.data.customerId == request.auth.uid || request.resource.data.driverId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        idMatches(bookingId) &&
+        hasAllFields(["id", "customerId", "bookingStatus", "updateAt"]) &&
+        request.resource.data.customerId == resource.data.customerId &&
+        (resource.data.customerId == request.auth.uid || resource.data.driverId == request.auth.uid || request.resource.data.driverId == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /intercity_ride/{rideId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["customerId", "driverId"]);
+      allow create: if isSignedIn() && idMatches(rideId) && hasAllFields(["id", "customerId", "bookingStatus", "createAt"]) &&
+        (request.resource.data.customerId == request.auth.uid || request.resource.data.driverId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        idMatches(rideId) &&
+        hasAllFields(["id", "customerId", "bookingStatus", "updateAt"]) &&
+        request.resource.data.customerId == resource.data.customerId &&
+        (resource.data.customerId == request.auth.uid || resource.data.driverId == request.auth.uid || request.resource.data.driverId == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /parcel_ride/{rideId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["customerId", "driverId"]);
+      allow create: if isSignedIn() && idMatches(rideId) && hasAllFields(["id", "customerId", "bookingStatus", "createAt"]) &&
+        (request.resource.data.customerId == request.auth.uid || request.resource.data.driverId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        idMatches(rideId) &&
+        hasAllFields(["id", "customerId", "bookingStatus", "updateAt"]) &&
+        request.resource.data.customerId == resource.data.customerId &&
+        (resource.data.customerId == request.auth.uid || resource.data.driverId == request.auth.uid || request.resource.data.driverId == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /rental_ride/{rideId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["customerId", "driverId"]);
+      allow create: if isSignedIn() && idMatches(rideId) && hasAllFields(["id", "customerId", "bookingStatus", "createAt"]) &&
+        (request.resource.data.customerId == request.auth.uid || request.resource.data.driverId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        idMatches(rideId) &&
+        hasAllFields(["id", "customerId", "bookingStatus", "updateAt"]) &&
+        request.resource.data.customerId == resource.data.customerId &&
+        (resource.data.customerId == request.auth.uid || resource.data.driverId == request.auth.uid || request.resource.data.driverId == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Wallets & payouts
+    match /wallet_transaction/{txnId} {
+      allow read: if isAdmin() || isOwnerByResourceField("userId");
+      allow create: if isSignedIn() && idMatches(txnId) &&
+        hasAllFields(["id", "userId", "amount", "createdDate", "type", "isCredit"]) &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /withdrawal_history/{docId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["userId", "driverId"]);
+      allow create: if isOwnerByAnyRequestField(["userId", "driverId"]);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /transaction_log/{docId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["userId", "driverId"]);
+      allow create: if isOwnerByAnyRequestField(["userId", "driverId"]);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Support tickets
+    match /support_ticket/{ticketId} {
+      allow read: if isAdmin() || isOwnerByResourceField("userId");
+      allow create: if isSignedIn() && idMatches(ticketId) &&
+        hasAllFields(["id", "userId", "title", "subject", "description", "status", "type", "createAt", "updateAt"]) &&
+        request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        request.auth.uid == resource.data.userId &&
+        request.resource.data.userId == resource.data.userId
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /notification/{notificationId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["customerId", "driverId", "senderId"]);
+      allow create: if isSignedIn() && idMatches(notificationId) && hasAllFields(["id", "createdAt", "type"]) &&
+        (request.resource.data.customerId == request.auth.uid || request.resource.data.driverId == request.auth.uid || request.resource.data.senderId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        request.resource.data.customerId == resource.data.customerId &&
+        request.resource.data.driverId == resource.data.driverId &&
+        request.resource.data.senderId == resource.data.senderId &&
+        (resource.data.customerId == request.auth.uid || resource.data.driverId == request.auth.uid || resource.data.senderId == request.auth.uid)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /sos_alerts/{alertId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["userId", "driverId"]);
+      allow create: if isSignedIn() && idMatches(alertId) && hasAllFields(["id", "createdAt", "type", "status"]) &&
+        (request.resource.data.userId == request.auth.uid || request.resource.data.driverId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    match /loyalty_point_transaction/{txnId} {
+      allow read: if isAdmin() || isOwnerByResourceField("customerId");
+      allow create: if isSignedIn() && idMatches(txnId) && hasAllFields(["id", "customerId", "points", "createdAt"]) &&
+        request.resource.data.customerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /bank_details/{docId} {
+      allow read: if isAdmin() || isOwnerByAnyField(["driverID"]);
+      allow create: if isSignedIn() && idMatches(docId) && hasAllFields(["id", "driverID", "holderName", "accountNumber"]) &&
+        request.resource.data.driverID == request.auth.uid;
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        request.resource.data.driverID == resource.data.driverID &&
+        request.resource.data.driverID == request.auth.uid
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /referral/{referralId} {
+      allow read: if isAdmin() || isOwnerByResourceField("userId");
+      allow create: if isSignedIn() && hasAllFields(["userId", "referralCode"]) && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Chats
+    match /chat/{chatId} {
+      allow read: if isAdmin() || (
+        isSignedIn() && (
+          resource.data.senderId == request.auth.uid ||
+          resource.data.receiverId == request.auth.uid ||
+          ("participants" in resource.data && request.auth.uid in resource.data.participants)
+        )
+      );
+      allow create, update: if isAdmin() || (
+        isSignedIn() && (
+          request.resource.data.senderId == request.auth.uid ||
+          request.resource.data.receiverId == request.auth.uid ||
+          ("participants" in request.resource.data && request.auth.uid in request.resource.data.participants)
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /chat/{userId}/inbox/{inboxId} {
+      allow read, write: if isAdmin() || request.auth.uid == userId;
+    }
+
+    // Reviews
+    match /review/{reviewId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Default deny
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

@@ -14,7 +14,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:latlong2/latlong.dart' as osmLatLng;
+import 'package:latlong2/latlong.dart' as osm_lat_lng;
 import '../../../constant/constants.dart';
 import '../../../utils/fire_store_utils.dart';
 
@@ -31,7 +31,7 @@ class CreateZoneScreenController extends GetxController {
   RxList<LatLng> polygonCoords = <LatLng>[].obs;
 
   late final osm.MapController osmMapController = osm.MapController();
-  RxList<osmLatLng.LatLng> osmPolygonCoords = <osmLatLng.LatLng>[].obs;
+  RxList<osm_lat_lng.LatLng> osmPolygonCoords = <osm_lat_lng.LatLng>[].obs;
   RxBool isOsmMapReady = false.obs;
   RxBool isPolygonLoaded = false.obs;
 
@@ -44,7 +44,7 @@ class CreateZoneScreenController extends GetxController {
 
   TextEditingController searchController = TextEditingController();
 
-  osmLatLng.LatLng toOsm(LatLng g) => osmLatLng.LatLng(g.latitude, g.longitude);
+  osm_lat_lng.LatLng toOsm(LatLng g) => osm_lat_lng.LatLng(g.latitude, g.longitude);
 
   @override
   Future<void> onInit() async {
@@ -139,7 +139,7 @@ class CreateZoneScreenController extends GetxController {
     }
   }
 
-  void addPolygonOSM(osmLatLng.LatLng point) {
+  void addPolygonOSM(osm_lat_lng.LatLng point) {
     addPolygon(
       LatLng(point.latitude, point.longitude),
     );
@@ -268,13 +268,13 @@ class CreateZoneScreenController extends GetxController {
     osmMapController.move(center, 15);
   }
 
-  osmLatLng.LatLng _getOsmCenter(List<osmLatLng.LatLng> pts) {
+  osm_lat_lng.LatLng _getOsmCenter(List<osm_lat_lng.LatLng> pts) {
     double lat = 0, lng = 0;
     for (final p in pts) {
       lat += p.latitude;
       lng += p.longitude;
     }
-    return osmLatLng.LatLng(lat / pts.length, lng / pts.length);
+    return osm_lat_lng.LatLng(lat / pts.length, lng / pts.length);
   }
 
   void setDefaultData() {
@@ -349,7 +349,7 @@ class CreateZoneScreenController extends GetxController {
         CameraUpdate.newLatLngZoom(target, 15),
       );
     } else {
-      osmMapController!.move(toOsm(target), 15);
+      osmMapController.move(toOsm(target), 15);
     }
     getAddressFromLatLng(target);
   }

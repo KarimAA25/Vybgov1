@@ -95,7 +95,14 @@ class TrackInterCityRideScreenController extends GetxController {
   String? _listeningDriverId;
 
   void getArgument() {
-    intercityModel.value = Get.arguments['IntercityModel'];
+    final argumentData = Get.arguments;
+    if (argumentData == null || argumentData['IntercityModel'] == null) {
+      developer.log("Missing IntercityModel in arguments", name: "TrackIntercity");
+      ShowToastDialog.showToast("Unable to open intercity ride details.".tr);
+      Get.back();
+      return;
+    }
+    intercityModel.value = argumentData['IntercityModel'];
 
     _bookingSub?.cancel();
     _bookingSub = FirebaseFirestore.instance.collection(CollectionName.interCityRide).doc(intercityModel.value.id).snapshots().listen((bookingSnap) {
@@ -140,6 +147,13 @@ class TrackInterCityRideScreenController extends GetxController {
     });
 
     isLoading.value = false;
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _onDriverUpdate(DocumentSnapshot driverSnap) async {
@@ -822,12 +836,5 @@ class TrackInterCityRideScreenController extends GetxController {
       return oldEta + (newEta > oldEta ? 1 : -1);
     }
     return newEta;
-  }
-
-  @override
-  void onClose() {
-    _bookingSub?.cancel();
-    _driverSub?.cancel();
-    super.onClose();
   }
 }

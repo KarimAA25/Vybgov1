@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:driver/app/models/driver_user_model.dart';
@@ -43,6 +44,9 @@ class RentalRideDetailsController extends GetxController {
   Rx<SOSAlertsModel> sosAlertsModel = SOSAlertsModel().obs;
   RxBool canShowSOS = false.obs;
 
+  StreamSubscription<DocumentSnapshot>? _bookingSub;
+  StreamSubscription? _emergencySub;
+
   @override
   void onInit() {
     getArguments();
@@ -52,20 +56,25 @@ class RentalRideDetailsController extends GetxController {
 
   void getArguments() {
     dynamic arguments = Get.arguments;
-    if (arguments != null) {
-      rentalModel.value = arguments['rentalBookingModel'];
-      getBookingDetails();
-      getEmergencyContacts();
-      if (rentalModel.value.bookingStatus == BookingStatus.bookingOngoing) {
-        checkSOSAvailability();
-      }
-      getReview();
+    if (arguments == null || arguments is! Map || arguments['rentalBookingModel'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
     }
+
+    rentalModel.value = arguments['rentalBookingModel'];
+    getBookingDetails();
+    getEmergencyContacts();
+    if (rentalModel.value.bookingStatus == BookingStatus.bookingOngoing) {
+      checkSOSAvailability();
+    }
+    getReview();
     isLoading.value = false;
   }
 
   Future<void> getBookingDetails() async {
-    FireStoreUtils.fireStore.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((value) {
+    _bookingSub?.cancel();
+    _bookingSub = FireStoreUtils.fireStore.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((value) {
       if (value.exists) {
         rentalModel.value = RentalBookingModel.fromJson(value.data()!);
         update();
@@ -267,7 +276,8 @@ class RentalRideDetailsController extends GetxController {
   }
 
   void getEmergencyContacts() {
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {
@@ -339,5 +349,12 @@ class RentalRideDetailsController extends GetxController {
     } catch (e) {
       log('Error notifying contacts: $e');
     }
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _emergencySub?.cancel();
+    super.onClose();
   }
 }

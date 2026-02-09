@@ -40,6 +40,9 @@ class BookingDetailsController extends GetxController {
   Rx<SOSAlertsModel> sosAlertsModel = SOSAlertsModel().obs;
   RxBool canShowSOS = false.obs;
 
+  StreamSubscription<DocumentSnapshot>? _bookingSub;
+  StreamSubscription? _emergencySub;
+
   @override
   void onInit() {
     getArguments();
@@ -47,15 +50,20 @@ class BookingDetailsController extends GetxController {
   }
 
   Future<void> getArguments() async {
-    if (Get.arguments != null) {
-      bookingModel.value = Get.arguments['bookingModel'];
-      log("+++++++++> ${bookingModel.toJson()}");
-      getBookingDetails();
-      getReview();
-      getEmergencyContacts();
-      if (bookingModel.value.bookingStatus == BookingStatus.bookingOngoing) {
-        checkSOSAvailability();
-      }
+    final args = Get.arguments;
+    if (args == null || args is! Map || args['bookingModel'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
+    }
+
+    bookingModel.value = args['bookingModel'];
+    log("+++++++++> ${bookingModel.toJson()}");
+    getBookingDetails();
+    getReview();
+    getEmergencyContacts();
+    if (bookingModel.value.bookingStatus == BookingStatus.bookingOngoing) {
+      checkSOSAvailability();
     }
     isLoading.value = false;
     update();
@@ -79,7 +87,8 @@ class BookingDetailsController extends GetxController {
   }
 
   void getBookingDetails() {
-    FireStoreUtils.fireStore.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((value) {
+    _bookingSub?.cancel();
+    _bookingSub = FireStoreUtils.fireStore.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((value) {
       if (value.exists) {
         bookingModel.value = BookingModel.fromJson(value.data()!);
         update();
@@ -89,6 +98,8 @@ class BookingDetailsController extends GetxController {
 
   @override
   void onClose() {
+    _bookingSub?.cancel();
+    _emergencySub?.cancel();
     super.onClose();
   }
 
@@ -295,7 +306,8 @@ class BookingDetailsController extends GetxController {
   }
 
   void getEmergencyContacts() {
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {

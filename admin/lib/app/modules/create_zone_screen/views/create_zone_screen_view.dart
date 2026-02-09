@@ -11,7 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:latlong2/latlong.dart' as osmLatLng;
+import 'package:latlong2/latlong.dart' as osm_lat_lng;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -297,11 +297,11 @@ class CreateZoneScreenView extends GetView<CreateZoneScreenController> {
                                                       mapController: controller.osmMapController,
                                                       options: osm.MapOptions(
                                                         initialCenter: Constant.currentPosition != null
-                                                            ? osmLatLng.LatLng(
+                                                            ? osm_lat_lng.LatLng(
                                                                 Constant.currentPosition!.latitude,
                                                                 Constant.currentPosition!.longitude,
                                                               )
-                                                            : const osmLatLng.LatLng(0, 0),
+                                                            : const osm_lat_lng.LatLng(0, 0),
                                                         initialZoom: 13,
                                                         interactionOptions: const osm.InteractionOptions(
                                                           flags: osm.InteractiveFlag.drag |
@@ -746,11 +746,11 @@ class CreateZoneScreenView extends GetView<CreateZoneScreenController> {
                                             mapController: controller.osmMapController,
                                             options: osm.MapOptions(
                                               initialCenter: Constant.currentPosition != null
-                                                  ? osmLatLng.LatLng(
+                                                  ? osm_lat_lng.LatLng(
                                                       Constant.currentPosition!.latitude,
                                                       Constant.currentPosition!.longitude,
                                                     )
-                                                  : const osmLatLng.LatLng(0, 0),
+                                                  : const osm_lat_lng.LatLng(0, 0),
                                               initialZoom: 13,
                                               interactionOptions: const osm.InteractionOptions(
                                                 flags: osm.InteractiveFlag.drag |
@@ -1230,11 +1230,11 @@ class CreateZoneScreenView extends GetView<CreateZoneScreenController> {
                                                           mapController: controller.osmMapController,
                                                           options: osm.MapOptions(
                                                             initialCenter: Constant.currentPosition != null
-                                                                ? osmLatLng.LatLng(
+                                                                ? osm_lat_lng.LatLng(
                                                                     Constant.currentPosition!.latitude,
                                                                     Constant.currentPosition!.longitude,
                                                                   )
-                                                                : const osmLatLng.LatLng(0, 0),
+                                                                : const osm_lat_lng.LatLng(0, 0),
                                                             initialZoom: 13,
                                                             interactionOptions: const osm.InteractionOptions(
                                                               flags: osm.InteractiveFlag.drag |

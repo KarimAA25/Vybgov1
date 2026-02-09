@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_overrides
 
+import 'dart:async';
+
 import 'package:driver/app/models/booking_model.dart';
 import 'package:driver/constant/booking_status.dart';
 import 'package:driver/constant/collection_name.dart';
@@ -15,6 +17,12 @@ class CabRidesController extends GetxController {
   RxList<BookingModel> bookingsRejectedList = <BookingModel>[].obs;
   RxList<BookingModel> newRideList = <BookingModel>[].obs;
 
+  StreamSubscription? _newRideSub;
+  StreamSubscription? _ongoingSub;
+  StreamSubscription? _cancelledSub;
+  StreamSubscription? _completedSub;
+  StreamSubscription? _rejectedSub;
+
   @override
   void onInit() {
     getBookingData();
@@ -28,11 +36,22 @@ class CabRidesController extends GetxController {
 
   @override
   void onClose() {
+    _newRideSub?.cancel();
+    _ongoingSub?.cancel();
+    _cancelledSub?.cancel();
+    _completedSub?.cancel();
+    _rejectedSub?.cancel();
     super.onClose();
   }
 
   void getBookingData() {
-    FireStoreUtils.fireStore
+    _newRideSub?.cancel();
+    _ongoingSub?.cancel();
+    _cancelledSub?.cancel();
+    _completedSub?.cancel();
+    _rejectedSub?.cancel();
+
+    _newRideSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('bookingStatus', whereIn: [BookingStatus.bookingPlaced, BookingStatus.driverAssigned])
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -46,7 +65,7 @@ class CabRidesController extends GetxController {
           }
         });
 
-    FireStoreUtils.fireStore
+    _ongoingSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('bookingStatus', whereIn: [BookingStatus.bookingOngoing, BookingStatus.bookingAccepted, BookingStatus.bookingOnHold])
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -60,7 +79,7 @@ class CabRidesController extends GetxController {
           }
         });
 
-    FireStoreUtils.fireStore
+    _cancelledSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('bookingStatus', isEqualTo: BookingStatus.bookingCancelled)
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -73,7 +92,7 @@ class CabRidesController extends GetxController {
       }
     });
 
-    FireStoreUtils.fireStore
+    _completedSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('bookingStatus', isEqualTo: BookingStatus.bookingCompleted)
         .where('driverId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -87,7 +106,7 @@ class CabRidesController extends GetxController {
       }
     });
 
-    FireStoreUtils.fireStore
+    _rejectedSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('rejectedDriverId', arrayContains: FireStoreUtils.getCurrentUid())
         .orderBy("createAt", descending: true)

@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides, deprecated_member_use
+import 'dart:async';
 import 'dart:math';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -38,6 +39,10 @@ class AskForOtpController extends GetxController {
   Rx<BookingModel> bookingModel = BookingModel().obs;
   RxBool isLoading = true.obs;
 
+  StreamSubscription<DocumentSnapshot>? _bookingSub;
+  StreamSubscription<DocumentSnapshot>? _driverSub;
+  String? _listeningDriverId;
+
   @override
   void onInit() {
     addMarkerSetup();
@@ -48,22 +53,33 @@ class AskForOtpController extends GetxController {
   /// ================= GET ARGUMENT + LIVE LISTENER =================
   Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
-    if (argumentData == null) return;
+    if (argumentData == null || argumentData is! Map || argumentData['bookingModel'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
+    }
 
     bookingModel.value = argumentData['bookingModel'];
 
-    FirebaseFirestore.instance.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((bookingSnap) {
+    _bookingSub?.cancel();
+    _bookingSub = FirebaseFirestore.instance.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((bookingSnap) {
       if (bookingSnap.data() == null) return;
 
       bookingModel.value = BookingModel.fromJson(bookingSnap.data()!);
 
-      FirebaseFirestore.instance.collection(CollectionName.drivers).doc(bookingModel.value.driverId).snapshots().listen((driverSnap) {
-        if (driverSnap.data() == null) return;
+      final driverId = bookingModel.value.driverId;
+      if (driverId != null && driverId.isNotEmpty) {
+        if (_listeningDriverId != driverId || _driverSub == null) {
+          _listeningDriverId = driverId;
+          _driverSub?.cancel();
+          _driverSub = FirebaseFirestore.instance.collection(CollectionName.drivers).doc(driverId).snapshots().listen((driverSnap) {
+            if (driverSnap.data() == null) return;
 
-        driverUserModel.value = DriverUserModel.fromJson(driverSnap.data()!);
-
-        _updateTracking();
-      });
+            driverUserModel.value = DriverUserModel.fromJson(driverSnap.data()!);
+            _updateTracking();
+          });
+        }
+      }
 
       if (bookingModel.value.bookingStatus == BookingStatus.bookingCompleted) {
         Get.back();
@@ -406,4 +422,11 @@ class AskForOtpController extends GetxController {
 //   }
 //   log("Failed to get visible region after retries.");
 // }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
+  }
 }

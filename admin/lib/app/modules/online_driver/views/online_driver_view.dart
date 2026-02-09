@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as osm;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:latlong2/latlong.dart' as osmLatLng;
+import 'package:latlong2/latlong.dart' as osm_lat_lng;
 import 'package:provider/provider.dart';
 import 'package:admin/app/utils/app_colors.dart';
 import 'package:admin/app/utils/app_them_data.dart';
@@ -185,11 +185,11 @@ class OnlineDriverView extends GetView<OnlineDriverController> {
                                             mapController: controller.osmMapController,
                                             options: osm.MapOptions(
                                               initialCenter: Constant.currentPosition != null
-                                                  ? osmLatLng.LatLng(
+                                                  ? osm_lat_lng.LatLng(
                                                       Constant.currentPosition!.latitude,
                                                       Constant.currentPosition!.longitude,
                                                     )
-                                                  : const osmLatLng.LatLng(0, 0),
+                                                  : const osm_lat_lng.LatLng(0, 0),
                                               initialZoom: 13,
                                               interactionOptions: const osm.InteractionOptions(
                                                 flags: osm.InteractiveFlag.drag |

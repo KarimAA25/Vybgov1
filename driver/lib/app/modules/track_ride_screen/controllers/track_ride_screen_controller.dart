@@ -96,7 +96,15 @@ class TrackRideScreenController extends GetxController {
   String? _listeningDriverId;
 
   void getArgument() {
-    bookingModel.value = Get.arguments['bookingModel'];
+    final args = Get.arguments;
+    if (args == null || args is! Map || args['bookingModel'] == null) {
+      developer.log("Missing bookingModel arguments in TrackRideScreenController");
+      ShowToastDialog.showToast("Ride not found".tr);
+      Get.back();
+      return;
+    }
+
+    bookingModel.value = args['bookingModel'];
 
     _bookingSub?.cancel();
     _bookingSub = FirebaseFirestore.instance.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((bookingSnap) {

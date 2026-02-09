@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides, deprecated_member_use
+import 'dart:async';
 import 'dart:math';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -39,6 +40,10 @@ class AskForOtpRentalController extends GetxController {
 
   RxBool isLoading = true.obs;
 
+  StreamSubscription<DocumentSnapshot>? _bookingSub;
+  StreamSubscription<DocumentSnapshot>? _driverSub;
+  String? _listeningDriverId;
+
   // @override
   // void onInit() {
   //   addMarkerSetup();
@@ -57,11 +62,16 @@ class AskForOtpRentalController extends GetxController {
   /// ================= ARGUMENT & FIRESTORE =================
   Future<void> getArgument() async {
     final args = Get.arguments;
-    if (args == null) return;
+    if (args == null || args is! Map || args['rentalBookingModel'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
+    }
 
     rentalModel.value = args['rentalBookingModel'];
 
-    FirebaseFirestore.instance.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((event) {
+    _bookingSub?.cancel();
+    _bookingSub = FirebaseFirestore.instance.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((event) {
       if (event.data() == null) return;
 
       rentalModel.value = RentalBookingModel.fromJson(event.data()!);
@@ -79,7 +89,12 @@ class AskForOtpRentalController extends GetxController {
   }
 
   void _listenDriver(String driverId) {
-    FirebaseFirestore.instance.collection(CollectionName.drivers).doc(driverId).snapshots().listen((driverEvent) {
+    if (_listeningDriverId == driverId && _driverSub != null) return;
+
+    _listeningDriverId = driverId;
+    _driverSub?.cancel();
+
+    _driverSub = FirebaseFirestore.instance.collection(CollectionName.drivers).doc(driverId).snapshots().listen((driverEvent) {
       if (driverEvent.data() == null) return;
 
       driverUserModel.value = DriverUserModel.fromJson(driverEvent.data()!);
@@ -406,4 +421,11 @@ class AskForOtpRentalController extends GetxController {
 //     return checkCameraLocation(cameraUpdate, mapController);
 //   }
 // }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
+  }
 }

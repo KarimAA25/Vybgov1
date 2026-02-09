@@ -67,8 +67,10 @@ class TrackRentalRideScreenController extends GetxController {
 
   Future<void> getArgument() async {
     final argumentData = Get.arguments;
-    if (argumentData == null) {
+    if (argumentData == null || argumentData is! Map || argumentData['rentalModel'] == null) {
       isLoading.value = false;
+      ShowToastDialog.showToast("Ride not found".tr);
+      Get.back();
       return;
     }
 

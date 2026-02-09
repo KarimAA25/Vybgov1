@@ -68,7 +68,17 @@ class TrackRentalRideScreenController extends GetxController {
   Future<void> getArgument() async {
     final argumentData = Get.arguments;
     if (argumentData == null) {
+      log("Missing rentalModel in arguments", name: "TrackRental");
+      ShowToastDialog.showToast("Unable to open rental ride details.".tr);
       isLoading.value = false;
+      Get.back();
+      return;
+    }
+    if (argumentData['rentalModel'] == null) {
+      log("Missing rentalModel in arguments", name: "TrackRental");
+      ShowToastDialog.showToast("Unable to open rental ride details.".tr);
+      isLoading.value = false;
+      Get.back();
       return;
     }
 
@@ -96,6 +106,13 @@ class TrackRentalRideScreenController extends GetxController {
 
     isLoading.value = false;
     update();
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
   }
 
   void _startDriverListener() {
@@ -411,12 +428,5 @@ class TrackRentalRideScreenController extends GetxController {
     final a = math.sin(dLat / 2) * math.sin(dLat / 2) + math.cos(_deg2rad(lat1)) * math.cos(_deg2rad(lat2)) * math.sin(dLon / 2) * math.sin(dLon / 2);
     final c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
     return R * c;
-  }
-
-  @override
-  void onClose() {
-    _bookingSub?.cancel();
-    _driverSub?.cancel();
-    super.onClose();
   }
 }

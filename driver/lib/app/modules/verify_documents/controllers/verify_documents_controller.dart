@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:driver/constant/collection_name.dart';
 import 'package:get/get.dart';
 import 'package:driver/app/models/documents_model.dart';
@@ -10,6 +12,8 @@ class VerifyDocumentsController extends GetxController {
   Rx<DriverUserModel> userModel = DriverUserModel().obs;
   RxBool isVerified = false.obs;
 
+  StreamSubscription? _driverSub;
+
   @override
   void onInit() {
     getData();
@@ -19,11 +23,18 @@ class VerifyDocumentsController extends GetxController {
   Future<void> getData() async {
     documentList.clear();
     documentList.value = await FireStoreUtils.getDocumentList();
-    FireStoreUtils.fireStore.collection(CollectionName.drivers).doc(FireStoreUtils.getCurrentUid()).snapshots().listen((snapShot) {
+    _driverSub?.cancel();
+    _driverSub = FireStoreUtils.fireStore.collection(CollectionName.drivers).doc(FireStoreUtils.getCurrentUid()).snapshots().listen((snapShot) {
       if (snapShot.exists && snapShot.data() != null) {
         userModel.value = DriverUserModel.fromJson(snapShot.data()!);
       }
     });
+  }
+
+  @override
+  void onClose() {
+    _driverSub?.cancel();
+    super.onClose();
   }
 
   bool checkUploadedData(String documentId) {

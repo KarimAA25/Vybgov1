@@ -143,8 +143,8 @@ class FireStoreUtils {
     }
   }
 
-  static void getSharingPersonsList(Function(List<PersonModel>) onUpdate) {
-    fireStore.collection(CollectionName.users).doc(getCurrentUid()).collection('sharing_persons').snapshots().listen((querySnapshot) {
+  static StreamSubscription getSharingPersonsList(Function(List<PersonModel>) onUpdate) {
+    return fireStore.collection(CollectionName.users).doc(getCurrentUid()).collection('sharing_persons').snapshots().listen((querySnapshot) {
       final updatedList = querySnapshot.docs.map((doc) => PersonModel.fromJson(doc.data())).toList();
       onUpdate(updatedList);
     }, onError: (error) {
@@ -864,6 +864,9 @@ class FireStoreUtils {
   static Future<bool?> setWalletTransaction(WalletTransactionModel walletTransactionModel) async {
     bool isAdded = false;
     try {
+      walletTransactionModel.id ??= Constant.getUuid();
+      walletTransactionModel.userId ??= FireStoreUtils.getCurrentUid();
+      walletTransactionModel.createdDate ??= Timestamp.now();
       await fireStore.collection(CollectionName.walletTransaction).doc(walletTransactionModel.id).set(walletTransactionModel.toJson());
       isAdded = true;
     } catch (error) {
@@ -939,6 +942,9 @@ class FireStoreUtils {
 
   static Future<bool?> setNotification(NotificationModel notificationModel) async {
     try {
+      notificationModel.id ??= Constant.getUuid();
+      notificationModel.customerId ??= FireStoreUtils.getCurrentUid();
+      notificationModel.createdAt ??= Timestamp.now();
       await fireStore.collection(CollectionName.notification).doc(notificationModel.id).set(notificationModel.toJson());
       return true;
     } catch (error) {
@@ -993,6 +999,11 @@ class FireStoreUtils {
 
   static Future<bool> addSupportTicket(SupportTicketModel supportTicketModel) async {
     try {
+      supportTicketModel.id ??= Constant.getUuid();
+      supportTicketModel.userId ??= FireStoreUtils.getCurrentUid();
+      supportTicketModel.type ??= "customer";
+      supportTicketModel.createAt ??= Timestamp.now();
+      supportTicketModel.updateAt ??= Timestamp.now();
       await fireStore.collection(CollectionName.supportTicket).doc(supportTicketModel.id).set(supportTicketModel.toJson());
       return true;
     } catch (error) {
@@ -1333,8 +1344,8 @@ class FireStoreUtils {
     }
   }
 
-  static void getEmergencyContacts(Function(List<EmergencyContactModel>) onUpdate) {
-    fireStore.collection(CollectionName.users).doc(getCurrentUid()).collection('emergency_contacts').snapshots().listen((querySnapshot) {
+  static StreamSubscription getEmergencyContacts(Function(List<EmergencyContactModel>) onUpdate) {
+    return fireStore.collection(CollectionName.users).doc(getCurrentUid()).collection('emergency_contacts').snapshots().listen((querySnapshot) {
       final updatedList = querySnapshot.docs.map((doc) => EmergencyContactModel.fromJson(doc.data())).toList();
       onUpdate(updatedList);
     }, onError: (error) {

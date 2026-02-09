@@ -94,7 +94,14 @@ class TrackParcelRideScreenController extends GetxController {
   String? _listeningDriverId;
 
   void getArgument() {
-    bookingModel.value = Get.arguments['ParcelModel'];
+    final argumentData = Get.arguments;
+    if (argumentData == null || argumentData['ParcelModel'] == null) {
+      developer.log("Missing ParcelModel in arguments", name: "TrackParcel");
+      ShowToastDialog.showToast("Unable to open parcel ride details.".tr);
+      Get.back();
+      return;
+    }
+    bookingModel.value = argumentData['ParcelModel'];
 
     _bookingSub?.cancel();
     _bookingSub = FirebaseFirestore.instance.collection(CollectionName.parcelRide).doc(bookingModel.value.id).snapshots().listen((bookingSnap) {
@@ -139,6 +146,13 @@ class TrackParcelRideScreenController extends GetxController {
     });
 
     isLoading.value = false;
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _onDriverUpdate(DocumentSnapshot driverSnap) async {
@@ -796,12 +810,5 @@ class TrackParcelRideScreenController extends GetxController {
       return oldEta + (newEta > oldEta ? 1 : -1);
     }
     return newEta;
-  }
-
-  @override
-  void onClose() {
-    _bookingSub?.cancel();
-    _driverSub?.cancel();
-    super.onClose();
   }
 }

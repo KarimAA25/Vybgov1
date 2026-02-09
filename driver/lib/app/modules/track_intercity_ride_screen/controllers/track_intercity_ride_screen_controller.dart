@@ -96,7 +96,15 @@ class TrackInterCityRideScreenController extends GetxController {
   String? _listeningDriverId;
 
   void getArgument() {
-    intercityModel.value = Get.arguments['interCityModel'];
+    final args = Get.arguments;
+    if (args == null || args is! Map || args['interCityModel'] == null) {
+      developer.log("Missing interCityModel arguments in TrackInterCityRideScreenController");
+      ShowToastDialog.showToast("Ride not found".tr);
+      Get.back();
+      return;
+    }
+
+    intercityModel.value = args['interCityModel'];
 
     _bookingSub?.cancel();
     _bookingSub = FirebaseFirestore.instance.collection(CollectionName.interCityRide).doc(intercityModel.value.id).snapshots().listen((bookingSnap) {
