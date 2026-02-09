@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:developer';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -30,6 +31,7 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart' as latlang;
 
 class BookIntercityController extends GetxController {
+  StreamSubscription? _sharingPersonsSub;
   RxBool isLoading = true.obs;
   RxInt selectedRideType = 1.obs;
   RxInt selectedPersons = 1.obs;
@@ -580,7 +582,8 @@ class BookIntercityController extends GetxController {
   // }
 
   void listenForLiveUpdates() {
-    FireStoreUtils.getSharingPersonsList((updatedList) {
+    _sharingPersonsSub?.cancel();
+    _sharingPersonsSub = FireStoreUtils.getSharingPersonsList((updatedList) {
       final uniquePersons = <String, PersonModel>{};
       for (final person in updatedList) {
         final id = person.id;
@@ -593,6 +596,12 @@ class BookIntercityController extends GetxController {
         log('Updated sharing person list: ${totalAddPersonShare.length}');
       }
     });
+  }
+
+  @override
+  void onClose() {
+    _sharingPersonsSub?.cancel();
+    super.onClose();
   }
 
   void toggleSelection(PersonModel person) {

@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -48,6 +49,9 @@ import '../../../../payments/xendit/xendit_model.dart';
 import '../../../../payments/xendit/xendit_payment_screen.dart';
 
 class RentalRideDetailsController extends GetxController {
+  StreamSubscription? _bookingSub;
+  StreamSubscription? _sosSub;
+  StreamSubscription? _emergencySub;
   RxBool isLoading = true.obs;
   Rx<UserModel> userModel = UserModel().obs;
   Rx<RentalBookingModel> rentalModel = RentalBookingModel().obs;
@@ -79,18 +83,30 @@ class RentalRideDetailsController extends GetxController {
   @override
   void onClose() {
     _razorpay.clear();
+    _bookingSub?.cancel();
+    _sosSub?.cancel();
+    _emergencySub?.cancel();
     super.onClose();
   }
 
   void getArguments() {
     dynamic arguments = Get.arguments;
     if (arguments != null) {
+      if (arguments["rentalModel"] == null) {
+        ShowToastDialog.showToast("Invalid booking details.".tr);
+        Get.back();
+        isLoading.value = false;
+        return;
+      }
       rentalModel.value = arguments["rentalModel"];
       getBookingDetails();
       getEmergencyContacts();
       if (rentalModel.value.bookingStatus == BookingStatus.bookingOngoing) {
         checkSOSAvailability();
       }
+    } else {
+      ShowToastDialog.showToast("Invalid booking details.".tr);
+      Get.back();
     }
     isLoading.value = false;
   }
@@ -110,7 +126,8 @@ class RentalRideDetailsController extends GetxController {
         }
       }
     });
-    FireStoreUtils.fireStore.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((value) {
+    _bookingSub?.cancel();
+    _bookingSub = FireStoreUtils.fireStore.collection(CollectionName.rentalRide).doc(rentalModel.value.id).snapshots().listen((value) {
       if (value.exists) {
         rentalModel.value = RentalBookingModel.fromJson(value.data()!);
         update();
@@ -767,7 +784,8 @@ class RentalRideDetailsController extends GetxController {
   }
 
   Future<void> checkSOSAvailability() async {
-    FirebaseFirestore.instance
+    _sosSub?.cancel();
+    _sosSub = FirebaseFirestore.instance
         .collection(CollectionName.sosAlerts)
         .where('bookingId', isEqualTo: rentalModel.value.id)
         .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -818,7 +836,8 @@ class RentalRideDetailsController extends GetxController {
   }
 
   void getEmergencyContacts() {
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {

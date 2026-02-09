@@ -15,14 +15,13 @@ import 'package:admin/widget/container_custom.dart';
 import 'package:admin/widget/global_widgets.dart';
 import 'package:admin/widget/text_widget.dart';
 import 'package:admin/widget/web_pagination.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../../../../widget/common_ui.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomerDetailsWidget extends StatelessWidget {
   const CustomerDetailsWidget({super.key});

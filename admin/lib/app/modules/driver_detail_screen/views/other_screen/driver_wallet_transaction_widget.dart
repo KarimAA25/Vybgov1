@@ -7,7 +7,6 @@ import 'package:admin/widget/container_custom.dart';
 import 'package:admin/widget/global_widgets.dart';
 import 'package:admin/widget/text_widget.dart';
 import 'package:admin/widget/web_pagination.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';

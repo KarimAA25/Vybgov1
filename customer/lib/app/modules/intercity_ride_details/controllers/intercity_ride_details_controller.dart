@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_overrides, non_constant_identifier_names
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -50,6 +51,9 @@ import '../../../../payments/xendit/xendit_model.dart';
 import '../../../../payments/xendit/xendit_payment_screen.dart';
 
 class InterCityRideDetailsController extends GetxController {
+  StreamSubscription? _bookingSub;
+  StreamSubscription? _sosSub;
+  StreamSubscription? _emergencySub;
   RxString bookingId = ''.obs;
   Rx<IntercityModel> interCityModel = IntercityModel().obs;
   RxList<ReviewModel> reviewList = <ReviewModel>[].obs;
@@ -71,6 +75,25 @@ class InterCityRideDetailsController extends GetxController {
 
   @override
   void onInit() {
+    final argumentData = Get.arguments;
+    if (argumentData is Map) {
+      if (argumentData['bookingId'] != null) {
+        bookingId.value = argumentData['bookingId'].toString();
+      }
+      if (argumentData['interCityModel'] != null) {
+        interCityModel.value = argumentData['interCityModel'];
+      }
+    }
+
+    if (bookingId.value.isEmpty && interCityModel.value.id != null) {
+      bookingId.value = interCityModel.value.id.toString();
+    }
+
+    if (bookingId.value.isEmpty) {
+      ShowToastDialog.showToast("Invalid booking details.".tr);
+      Get.back();
+      return;
+    }
     getBookingDetails();
     getReview();
     super.onInit();
@@ -79,6 +102,9 @@ class InterCityRideDetailsController extends GetxController {
   @override
   void onClose() {
     _razorpay.clear();
+    _bookingSub?.cancel();
+    _sosSub?.cancel();
+    _emergencySub?.cancel();
     super.onClose();
   }
 
@@ -130,7 +156,8 @@ class InterCityRideDetailsController extends GetxController {
   }
 
   void listenToInterCityRideDetails() {
-    FireStoreUtils.getInterCityRideDetails(bookingId.value).listen((IntercityModel? model) {
+    _bookingSub?.cancel();
+    _bookingSub = FireStoreUtils.getInterCityRideDetails(bookingId.value).listen((IntercityModel? model) {
       interCityModel.value = model ?? IntercityModel();
     });
     if (selectedPaymentMethod.value == '') {
@@ -749,7 +776,8 @@ class InterCityRideDetailsController extends GetxController {
   }
 
   Future<void> checkSOSAvailability() async {
-    FirebaseFirestore.instance
+    _sosSub?.cancel();
+    _sosSub = FirebaseFirestore.instance
         .collection(CollectionName.sosAlerts)
         .where('bookingId', isEqualTo: interCityModel.value.id)
         .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
@@ -800,7 +828,8 @@ class InterCityRideDetailsController extends GetxController {
   }
 
   void getEmergencyContacts() {
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {

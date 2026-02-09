@@ -29,6 +29,9 @@ import 'package:location/location.dart';
 import 'package:location/location.dart' as loc;
 
 class HomeController extends GetxController with GetTickerProviderStateMixin {
+  StreamSubscription? _userSub;
+  StreamSubscription? _bookingSub;
+  StreamSubscription<LocationData>? _locationSub;
   // ===== Observables =====
   RxBool isOnline = false.obs;
   RxBool isLoading = true.obs;
@@ -90,6 +93,9 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
 
   @override
   void onClose() {
+    _userSub?.cancel();
+    _bookingSub?.cancel();
+    _locationSub?.cancel();
     tabController.dispose();
     super.onClose();
   }
@@ -117,7 +123,8 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
   }
 
   void getUserData() async {
-    FireStoreUtils.fireStore
+    _userSub?.cancel();
+    _userSub = FireStoreUtils.fireStore
         .collection(CollectionName.drivers)
         .doc(FireStoreUtils.getCurrentUid())
         .snapshots()
@@ -144,7 +151,8 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
   }
 
   void _listenBooking() {
-    FireStoreUtils.fireStore
+    _bookingSub?.cancel();
+    _bookingSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where("id", isEqualTo: userModel.value.bookingId)
         .where('bookingStatus', whereIn: [
@@ -257,7 +265,8 @@ class HomeController extends GetxController with GetTickerProviderStateMixin {
       distanceFilter: double.parse(Constant.driverLocationUpdate.toString()),
     );
 
-    location.onLocationChanged.listen((data) async {
+    _locationSub?.cancel();
+    _locationSub = location.onLocationChanged.listen((data) async {
       if (data.latitude == null || data.longitude == null) return;
 
       await updateDriverFirestore(data);

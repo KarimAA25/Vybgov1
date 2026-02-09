@@ -83,7 +83,7 @@ dependencies:
   lottie: ^3.3.2
 
 dependency_overrides:
-  web: ^1.1.9
+  web: ^1.1.1
   rxdart: ^0.28.0
   google_api_headers: ^5.1.0
   package_info_plus: ^9.0.0

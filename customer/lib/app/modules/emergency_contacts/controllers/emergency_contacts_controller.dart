@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:customer/app/models/emergency_number_model.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant_widgets/show_toast_dialog.dart';
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EmergencyContactsController extends GetxController {
+  StreamSubscription? _emergencySub;
   RxBool isLoading = true.obs;
   RxList<EmergencyContactModel> totalEmergencyContacts = <EmergencyContactModel>[].obs;
   Rx<EmergencyContactModel> contactModel = EmergencyContactModel().obs;
@@ -24,8 +27,8 @@ class EmergencyContactsController extends GetxController {
 
   void getEmergencyContacts() {
     isLoading.value = true;
-
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {
@@ -40,6 +43,12 @@ class EmergencyContactsController extends GetxController {
       isLoading.value = false;
       update();
     });
+  }
+
+  @override
+  void onClose() {
+    _emergencySub?.cancel();
+    super.onClose();
   }
 
   Future<void> addEmergencyContact() async {

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:admin/app/constant/constants.dart';
 import 'package:admin/app/models/language_model.dart';
 import 'package:admin/app/utils/fire_store_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_pages.dart';
@@ -12,6 +13,11 @@ class SplashScreenController extends GetxController {
   RxBool isLoading = true.obs;
   RxList<LanguageModel> languageList = <LanguageModel>[].obs;
   Rx<LanguageModel> selectedLanguage = LanguageModel().obs;
+
+  @visibleForTesting
+  static String routeForLoginState({required bool isLoggedIn}) {
+    return isLoggedIn ? Routes.DASHBOARD_SCREEN : Routes.LOGIN_PAGE;
+  }
 
   @override
   Future<void> onInit() async {
@@ -27,8 +33,10 @@ class SplashScreenController extends GetxController {
     await FireStoreUtils.getPayment();
     bool isLogin = await FireStoreUtils.isLogin();
 
+    final targetRoute = routeForLoginState(isLoggedIn: isLogin);
+
     if (!isLogin && Get.currentRoute != Routes.LOGIN_PAGE) {
-      Get.offAllNamed(Routes.LOGIN_PAGE);
+      Get.offAllNamed(targetRoute);
     } else if (isLogin) {
       final admin = await FireStoreUtils.getAdmin();
       if (admin != null) {
@@ -36,7 +44,7 @@ class SplashScreenController extends GetxController {
       }
       // Only navigate if currently in splash
       if (Get.currentRoute == Routes.SPLASH_SCREEN || Get.currentRoute.isEmpty) {
-        Get.offAllNamed(Routes.DASHBOARD_SCREEN);
+        Get.offAllNamed(targetRoute);
       }
     }
 

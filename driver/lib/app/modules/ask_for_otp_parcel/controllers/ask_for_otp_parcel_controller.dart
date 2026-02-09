@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides, deprecated_member_use
+import 'dart:async';
 import 'dart:math';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -31,6 +32,10 @@ class AskForOtpParcelController extends GetxController {
   RxBool isLoading = true.obs;
   RxString type = "".obs;
 
+  StreamSubscription<DocumentSnapshot>? _parcelSub;
+  StreamSubscription<DocumentSnapshot>? _driverSub;
+  String? _listeningDriverId;
+
   // =================== ICONS ===================
   BitmapDescriptor? departureIcon;
   BitmapDescriptor? destinationIcon;
@@ -50,50 +55,62 @@ class AskForOtpParcelController extends GetxController {
   // =================== ARGUMENT + LIVE LISTENER ===================
   Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
-    if (argumentData != null) {
-      parcelModel.value = argumentData['bookingModel'];
-
-      FirebaseFirestore.instance.collection(CollectionName.parcelRide).doc(parcelModel.value.id).snapshots().listen((parcelEvent) {
-        if (parcelEvent.data() == null) return;
-
-        parcelModel.value = ParcelModel.fromJson(parcelEvent.data()!);
-
-        FirebaseFirestore.instance.collection(CollectionName.drivers).doc(parcelModel.value.driverId).snapshots().listen((driverEvent) {
-          if (driverEvent.data() == null) return;
-
-          driverUserModel.value = DriverUserModel.fromJson(driverEvent.data()!);
-
-          final bool isOngoing = parcelModel.value.bookingStatus == BookingStatus.bookingOngoing;
-
-          final double sourceLat = driverUserModel.value.location!.latitude!;
-          final double sourceLng = driverUserModel.value.location!.longitude!;
-
-          final double destLat = isOngoing ? parcelModel.value.dropLocation!.latitude! : parcelModel.value.pickUpLocation!.latitude!;
-
-          final double destLng = isOngoing ? parcelModel.value.dropLocation!.longitude! : parcelModel.value.pickUpLocation!.longitude!;
-
-          // ================= GOOGLE MAP =================
-          getPolyline(
-            sourceLatitude: sourceLat,
-            sourceLongitude: sourceLng,
-            destinationLatitude: destLat,
-            destinationLongitude: destLng,
-          );
-
-          // ================= OSM MAP =================
-          updateOSMRouteAndMarkers(
-            sourceLat: sourceLat,
-            sourceLng: sourceLng,
-            destLat: destLat,
-            destLng: destLng,
-          );
-        });
-
-        if (parcelModel.value.bookingStatus == BookingStatus.bookingCompleted) {
-          Get.back();
-        }
-      });
+    if (argumentData == null || argumentData is! Map || argumentData['bookingModel'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
     }
+
+    parcelModel.value = argumentData['bookingModel'];
+
+    _parcelSub?.cancel();
+    _parcelSub = FirebaseFirestore.instance.collection(CollectionName.parcelRide).doc(parcelModel.value.id).snapshots().listen((parcelEvent) {
+      if (parcelEvent.data() == null) return;
+
+      parcelModel.value = ParcelModel.fromJson(parcelEvent.data()!);
+
+      final driverId = parcelModel.value.driverId;
+      if (driverId != null && driverId.isNotEmpty) {
+        if (_listeningDriverId != driverId || _driverSub == null) {
+          _listeningDriverId = driverId;
+          _driverSub?.cancel();
+          _driverSub = FirebaseFirestore.instance.collection(CollectionName.drivers).doc(driverId).snapshots().listen((driverEvent) {
+            if (driverEvent.data() == null) return;
+
+            driverUserModel.value = DriverUserModel.fromJson(driverEvent.data()!);
+
+            final bool isOngoing = parcelModel.value.bookingStatus == BookingStatus.bookingOngoing;
+
+            final double sourceLat = driverUserModel.value.location!.latitude!;
+            final double sourceLng = driverUserModel.value.location!.longitude!;
+
+            final double destLat = isOngoing ? parcelModel.value.dropLocation!.latitude! : parcelModel.value.pickUpLocation!.latitude!;
+
+            final double destLng = isOngoing ? parcelModel.value.dropLocation!.longitude! : parcelModel.value.pickUpLocation!.longitude!;
+
+            // ================= GOOGLE MAP =================
+            getPolyline(
+              sourceLatitude: sourceLat,
+              sourceLongitude: sourceLng,
+              destinationLatitude: destLat,
+              destinationLongitude: destLng,
+            );
+
+            // ================= OSM MAP =================
+            updateOSMRouteAndMarkers(
+              sourceLat: sourceLat,
+              sourceLng: sourceLng,
+              destLat: destLat,
+              destLng: destLng,
+            );
+          });
+        }
+      }
+
+      if (parcelModel.value.bookingStatus == BookingStatus.bookingCompleted) {
+        Get.back();
+      }
+    });
 
     isLoading.value = false;
     update();
@@ -431,4 +448,11 @@ class AskForOtpParcelController extends GetxController {
 //     return checkCameraLocation(cameraUpdate, mapController);
 //   }
 // }
+
+  @override
+  void onClose() {
+    _parcelSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
+  }
 }

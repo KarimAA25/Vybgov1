@@ -108,13 +108,16 @@ class HomeController extends GetxController {
   DateTime _lastCameraFollow = DateTime.fromMillisecondsSinceEpoch(0);
   final Duration cameraFollowThrottle = const Duration(milliseconds: 250);
 
+  StreamSubscription? _profileSub;
+  StreamSubscription? _ongoingSub;
   StreamSubscription? _userSub;
   StreamSubscription? _bookingSub;
   StreamSubscription? _driverSub;
 
   bool get hasActiveRide {
-    return Constant.userModel!.activeRideId != null &&
-        Constant.userModel!.activeRideId!.isNotEmpty &&
+    final currentUser = Constant.userModel;
+    return currentUser?.activeRideId != null &&
+        currentUser!.activeRideId!.isNotEmpty &&
         (bookingModel.value.bookingStatus == BookingStatus.bookingPlaced ||
             bookingModel.value.bookingStatus == BookingStatus.driverAssigned ||
             bookingModel.value.bookingStatus == BookingStatus.bookingAccepted ||
@@ -132,7 +135,8 @@ class HomeController extends GetxController {
   Future<void> getUserData() async {
     isLoading.value = true;
     final fcmFuture = NotificationService.getToken();
-    FireStoreUtils.fireStore.collection(CollectionName.users).doc(FireStoreUtils.getCurrentUid()).snapshots().listen(
+    _profileSub?.cancel();
+    _profileSub = FireStoreUtils.fireStore.collection(CollectionName.users).doc(FireStoreUtils.getCurrentUid()).snapshots().listen(
       (event) async {
         if (!event.exists) return;
         userModel.value = UserModel.fromJson(event.data()!);
@@ -255,7 +259,8 @@ class HomeController extends GetxController {
   }
 
   void getOngoingBooking() {
-    FireStoreUtils.fireStore
+    _ongoingSub?.cancel();
+    _ongoingSub = FireStoreUtils.fireStore
         .collection(CollectionName.bookings)
         .where('bookingStatus',
             whereIn: [BookingStatus.bookingAccepted, BookingStatus.bookingPlaced, BookingStatus.bookingOngoing, BookingStatus.driverAssigned, BookingStatus.bookingOnHold])
@@ -1061,6 +1066,8 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
+    _profileSub?.cancel();
+    _ongoingSub?.cancel();
     _userSub?.cancel();
     _bookingSub?.cancel();
     _driverSub?.cancel();

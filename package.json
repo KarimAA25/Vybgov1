@@ -1,4 +1,10 @@
 {
+  "scripts": {
+    "driver:run": "cd driver && flutter run",
+    "customer:run": "cd customer && flutter run",
+    "admin:run": "cd admin && flutter run -d chrome",
+    "functions:ci": "cd functions && npm ci && npm run lint"
+  },
   "dependencies": {
     "firebase": "^12.8.0",
     "firebase-tools": "^15.4.0",

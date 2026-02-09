@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:ui';
 import 'package:admin/app/constant/collection_name.dart';
 import 'package:admin/app/constant/constants.dart';
 import 'package:admin/app/models/driver_user_model.dart';
@@ -10,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_map/flutter_map.dart' as osm;
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:latlong2/latlong.dart' as osmLatLng;
+import 'package:latlong2/latlong.dart' as osm_lat_lng;
 import '../../../routes/app_pages.dart';
 
 class OnlineDriverController extends GetxController {
@@ -80,7 +79,7 @@ class OnlineDriverController extends GetxController {
             );
 
             osmMarkers.add(osm.Marker(
-                point: osmLatLng.LatLng(driverUserModel.location!.latitude!, driverUserModel.location!.longitude!),
+                point: osm_lat_lng.LatLng(driverUserModel.location!.latitude!, driverUserModel.location!.longitude!),
                 child: GestureDetector(
                   onTap: () {
                     if (id.isEmpty) return;

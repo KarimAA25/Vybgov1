@@ -1,7 +1,9 @@
 node_modules
+**/node_modules/
 
 # Flutter/Dart
 .dart_tool/
+**/.dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
@@ -10,6 +12,15 @@ build/
 **/build/
 .metadata
 pubspec.lock
+coverage/
+
+# Firebase/Firestore exports & archives
+Database/config.json
+Database/database.json
+**/*.zip
+
+# Firebase local artifacts
+**/.firebase/
 
 # IDE/OS
 .idea/
@@ -18,4 +29,4 @@ pubspec.lock
 *.iml
 
 # Secrets
-Database/config.json
+# (Secrets are explicitly listed above)

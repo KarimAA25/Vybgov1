@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides, deprecated_member_use
+import 'dart:async';
 import 'dart:developer';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -34,6 +35,10 @@ class AskForOtpInterCityController extends GetxController {
 
   RxBool isLoading = true.obs;
 
+  StreamSubscription<DocumentSnapshot>? _bookingSub;
+  StreamSubscription<DocumentSnapshot>? _driverSub;
+  String? _listeningDriverId;
+
   /// ================= ICONS =================
   BitmapDescriptor? departureIcon;
   BitmapDescriptor? destinationIcon;
@@ -52,22 +57,33 @@ class AskForOtpInterCityController extends GetxController {
   /// ================= GET ARGUMENT & LIVE STREAM =================
   Future<void> getArgument() async {
     dynamic argumentData = Get.arguments;
-    if (argumentData == null) return;
+    if (argumentData == null || argumentData is! Map || argumentData['intercity'] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
+    }
 
     interCityModel.value = argumentData['intercity'];
 
-    FirebaseFirestore.instance.collection(CollectionName.interCityRide).doc(interCityModel.value.id).snapshots().listen((event) {
+    _bookingSub?.cancel();
+    _bookingSub = FirebaseFirestore.instance.collection(CollectionName.interCityRide).doc(interCityModel.value.id).snapshots().listen((event) {
       if (event.data() == null) return;
 
       interCityModel.value = IntercityModel.fromJson(event.data()!);
 
-      FirebaseFirestore.instance.collection(CollectionName.drivers).doc(interCityModel.value.driverId).snapshots().listen((driverSnap) {
-        if (driverSnap.data() == null) return;
+      final driverId = interCityModel.value.driverId;
+      if (driverId != null && driverId.isNotEmpty) {
+        if (_listeningDriverId != driverId || _driverSub == null) {
+          _listeningDriverId = driverId;
+          _driverSub?.cancel();
+          _driverSub = FirebaseFirestore.instance.collection(CollectionName.drivers).doc(driverId).snapshots().listen((driverSnap) {
+            if (driverSnap.data() == null) return;
 
-        driverUserModel.value = DriverUserModel.fromJson(driverSnap.data()!);
-
-        _handleLiveTracking();
-      });
+            driverUserModel.value = DriverUserModel.fromJson(driverSnap.data()!);
+            _handleLiveTracking();
+          });
+        }
+      }
 
       if (interCityModel.value.bookingStatus == BookingStatus.bookingCompleted) {
         Get.back();
@@ -479,4 +495,11 @@ class AskForOtpInterCityController extends GetxController {
 //     return checkCameraLocation(cameraUpdate, mapController);
 //   }
 // }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
+  }
 }

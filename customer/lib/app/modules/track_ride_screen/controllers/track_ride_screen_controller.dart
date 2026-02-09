@@ -95,7 +95,14 @@ class TrackRideScreenController extends GetxController {
   String? _listeningDriverId;
 
   void getArgument() {
-    bookingModel.value = Get.arguments['bookingModel'];
+    final argumentData = Get.arguments;
+    if (argumentData == null || argumentData['bookingModel'] == null) {
+      developer.log("Missing bookingModel in arguments", name: "TrackRide");
+      ShowToastDialog.showToast("Unable to open ride details.".tr);
+      Get.back();
+      return;
+    }
+    bookingModel.value = argumentData['bookingModel'];
 
     _bookingSub?.cancel();
     _bookingSub = FirebaseFirestore.instance.collection(CollectionName.bookings).doc(bookingModel.value.id).snapshots().listen((bookingSnap) {
@@ -140,6 +147,13 @@ class TrackRideScreenController extends GetxController {
     });
 
     isLoading.value = false;
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _driverSub?.cancel();
+    super.onClose();
   }
 
   Future<void> _onDriverUpdate(DocumentSnapshot driverSnap) async {
@@ -822,12 +836,5 @@ class TrackRideScreenController extends GetxController {
       return oldEta + (newEta > oldEta ? 1 : -1);
     }
     return newEta;
-  }
-
-  @override
-  void onClose() {
-    _bookingSub?.cancel();
-    _driverSub?.cancel();
-    super.onClose();
   }
 }

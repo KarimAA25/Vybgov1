@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_overrides
+import 'dart:async';
 import 'dart:developer';
 
 // ignore_for_file: depend_on_referenced_packages
@@ -44,6 +45,9 @@ class InterCityBookingDetailsController extends GetxController {
   Rx<SOSAlertsModel> sosAlertsModel = SOSAlertsModel().obs;
   RxBool canShowSOS = false.obs;
 
+  StreamSubscription<IntercityModel?>? _bookingSub;
+  StreamSubscription? _emergencySub;
+
   @override
   void onInit() {
     super.onInit();
@@ -74,15 +78,19 @@ class InterCityBookingDetailsController extends GetxController {
 
   Future<void> getBookingDetails() async {
     isLoading.value = true;
-    if (Get.arguments != null) {
-      if (Get.arguments["bookingId"] != null) {
-        bookingId.value = Get.arguments["bookingId"];
-        isSearch.value = Get.arguments["isSearch"] ?? false;
-      }
+    final args = Get.arguments;
+    if (args == null || args is! Map || args["bookingId"] == null) {
+      isLoading.value = false;
+      Get.back();
+      return;
     }
 
+    bookingId.value = args["bookingId"];
+    isSearch.value = args["isSearch"] ?? false;
+
     try {
-      FireStoreUtils.getInterCityRideDetails(bookingId.value).listen((IntercityModel? model) {
+      _bookingSub?.cancel();
+      _bookingSub = FireStoreUtils.getInterCityRideDetails(bookingId.value).listen((IntercityModel? model) {
         if (model != null) {
           interCityModel.value = model;
         } else {
@@ -289,7 +297,8 @@ class InterCityBookingDetailsController extends GetxController {
   }
 
   void getEmergencyContacts() {
-    FireStoreUtils.getEmergencyContacts((updatedList) {
+    _emergencySub?.cancel();
+    _emergencySub = FireStoreUtils.getEmergencyContacts((updatedList) {
       final uniquePersons = <String, EmergencyContactModel>{};
 
       for (final person in updatedList) {
@@ -361,5 +370,12 @@ class InterCityBookingDetailsController extends GetxController {
     } catch (e) {
       log('Error notifying contacts: $e');
     }
+  }
+
+  @override
+  void onClose() {
+    _bookingSub?.cancel();
+    _emergencySub?.cancel();
+    super.onClose();
   }
 }
