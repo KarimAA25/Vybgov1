@@ -1,5 +1,6 @@
 import 'package:admin/app/modules/splash_screen/controllers/splash_screen_controller.dart';
-import 'package:admin/app/routes/app_routes.dart';
+//import 'package:admin/app/routes/app_routes.dart';
+import 'package:admin/app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';

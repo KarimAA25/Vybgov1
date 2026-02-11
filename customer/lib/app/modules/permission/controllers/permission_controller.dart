@@ -4,7 +4,7 @@ import 'package:customer/app/modules/intro_screen/views/intro_screen_view.dart';
 import 'package:customer/app/modules/login/views/login_view.dart';
 import 'package:customer/constant_widgets/round_shape_button.dart';
 import 'package:customer/theme/app_them_data.dart';
-import 'package:customer/utils/Preferences.dart';
+import 'package:customer/utils/preferences.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

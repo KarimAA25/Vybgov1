@@ -1,7 +1,7 @@
 // ignore_for_file: unnecessary_overrides
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:customer/app/models/onboarding_model.dart';
+import 'package:customer/app/models/onBoarding_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 

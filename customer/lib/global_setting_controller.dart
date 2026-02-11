@@ -9,7 +9,7 @@ import 'package:customer/constant/constant.dart';
 import 'package:customer/extension/hax_color_extension.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/theme/app_them_data.dart';
-import 'package:customer/utils/Preferences.dart';
+import 'package:customer/utils/preferences.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/notification_service.dart';
 

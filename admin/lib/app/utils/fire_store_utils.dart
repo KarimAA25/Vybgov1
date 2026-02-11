@@ -26,7 +26,7 @@ import 'package:admin/app/models/loyalty_point_transaction_model.dart';
 import 'package:admin/app/models/model_vehicle_model.dart';
 import 'package:admin/app/models/notification_model.dart';
 import 'package:admin/app/models/push_notification_model.dart';
-import 'package:admin/app/models/onboarding_model.dart';
+import 'package:admin/app/models/onBoarding_model.dart';
 import 'package:admin/app/models/parcel_model.dart';
 import 'package:admin/app/models/payment_method_model.dart';
 import 'package:admin/app/models/payout_request_model.dart';
